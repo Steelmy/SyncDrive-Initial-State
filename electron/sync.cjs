@@ -1,21 +1,21 @@
 const fs = require('fs');
-const util = require('util');
 const path = require('path');
-const readdir = util.promisify(fs.readdir);
-const lstat = util.promisify(fs.lstat);
-const rm = util.promisify(fs.rm ? fs.rm : fs.rmdir);
-const unlink = util.promisify(fs.unlink);
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const { google } = require('googleapis');
 const store = require('./store.cjs');
 const { manageBackupFiles, createZipFromDirectory } = require('./folders.cjs');
 const CREDENTIALS = require('./credentials.cjs');
+const { escapeDriveQuery, getDirectoryLastModified } = require('./utils.cjs');
 
-let mainWindow;
-let syncIntervals = new Map(); // Map to store intervals for each instance
+let mainWindow = null;
+let syncIntervals = new Map();
 const DEFAULT_SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
-let isSyncing = new Map(); // Map to track sync status for each instance
+let isSyncing = new Map();
+
+function setMainWindow(win) {
+  mainWindow = win;
+}
 
 function startSyncInterval(instanceId) {
   // Clear existing interval if any
@@ -114,7 +114,7 @@ async function syncWithDrive(instanceId, isManual = false) {
         
         // Check for existing ZIP files in the current folder
         const driveFiles = await drive.files.list({
-          q: `'${instance.currentFolderId}' in parents and name contains '${folderName}_' and name contains '.zip' and trashed=false`,
+          q: `'${escapeDriveQuery(instance.currentFolderId)}' in parents and name contains '${escapeDriveQuery(folderName)}_' and name contains '.zip' and trashed=false`,
           fields: 'files(id, name, modifiedTime)',
           orderBy: 'modifiedTime desc',
         });
@@ -244,12 +244,12 @@ async function syncWithDrive(instanceId, isManual = false) {
       // Continue with individual file sync
       for (const localFile of localFiles) {
         const relativePath = path.relative(instance.rootDirectory, localFile);
-        const fileName = path.basename(localFile);
+        const fileName = relativePath.replace(/\\/g, '/');  // Use relative path to preserve folder structure
         
         try {
           // Check if file exists in current folder
           const driveFiles = await drive.files.list({
-            q: `'${instance.currentFolderId}' in parents and name='${fileName}' and trashed=false`,
+            q: `'${escapeDriveQuery(instance.currentFolderId)}' in parents and name='${escapeDriveQuery(fileName)}' and trashed=false`,
             fields: 'files(id, name, modifiedTime)',
           });
           
@@ -416,7 +416,7 @@ async function syncWithDrive(instanceId, isManual = false) {
 async function deleteFilesInCurrent(drive, instance) {
   try {
     const response = await drive.files.list({
-      q: `'${instance.currentFolderId}' in parents and trashed=false`,
+      q: `'${escapeDriveQuery(instance.currentFolderId)}' in parents and trashed=false`,
       fields: 'files(id, name, modifiedTime)',
     });
     const files = response.data.files || [];
@@ -442,7 +442,7 @@ async function createCurrentBackup(drive, instance, syncResults) {
     
     // Get all files from current folder
     const currentFiles = await drive.files.list({
-      q: `'${instance.currentFolderId}' in parents and trashed=false`,
+      q: `'${escapeDriveQuery(instance.currentFolderId)}' in parents and trashed=false`,
       fields: 'files(id, name, modifiedTime)',
     });
     
@@ -532,35 +532,6 @@ async function createCurrentBackup(drive, instance, syncResults) {
   }
 }
 
-// Get the most recent modification time in a directory
-function getDirectoryLastModified(dirPath) {
-  let latestTime = new Date(0);
-  
-  function checkDirectory(currentPath) {
-    try {
-      const items = fs.readdirSync(currentPath);
-      
-      for (const item of items) {
-        const fullPath = path.join(currentPath, item);
-        const stats = fs.statSync(fullPath);
-        
-        if (stats.mtime > latestTime) {
-          latestTime = stats.mtime;
-        }
-        
-        if (stats.isDirectory()) {
-          checkDirectory(fullPath);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking directory:', error);
-    }
-  }
-  
-  checkDirectory(dirPath);
-  return latestTime;
-}
-
 function getAllFilesRecursively(dirPath) {
   let files = [];
 
@@ -588,4 +559,4 @@ function getAllFilesRecursively(dirPath) {
   return files;
 }
 
-module.exports = { DEFAULT_SYNC_INTERVAL, syncIntervals, startSyncInterval, stopSyncInterval, syncWithDrive };
+module.exports = { DEFAULT_SYNC_INTERVAL, syncIntervals, startSyncInterval, stopSyncInterval, syncWithDrive, setMainWindow };

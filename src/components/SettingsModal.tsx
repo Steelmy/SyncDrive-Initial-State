@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Folder, RefreshCw, Info, Edit3, Check, AlertCircle, LogOut, Archive, Power, PowerOff, Download } from 'lucide-react';
+import { X, Folder, RefreshCw, Info, Edit3, Check, AlertCircle, LogOut, Archive, Power, PowerOff, Download, Moon, Sun } from 'lucide-react';
 import { Instance } from '../types';
 
 interface SettingsModalProps {
@@ -8,6 +8,8 @@ interface SettingsModalProps {
   currentInstance: Instance | null;
   onChangeDirectory: () => void;
   onLogout: () => void;
+  darkMode: boolean;
+  onToggleDarkMode: (enabled: boolean) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -15,7 +17,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   currentInstance,
   onChangeDirectory,
-  onLogout
+  onLogout,
+  darkMode,
+  onToggleDarkMode
 }) => {
   const [isEditingPath, setIsEditingPath] = useState(false);
   const [editedPath, setEditedPath] = useState('');
@@ -26,7 +30,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [isUpdatingZipMode, setIsUpdatingZipMode] = useState(false);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
   const [isUpdatingAutoSync, setIsUpdatingAutoSync] = useState(false);
-  
+
   // Download settings
   const [downloadPath, setDownloadPath] = useState('');
   const [downloadUnzip, setDownloadUnzip] = useState(true);
@@ -174,7 +178,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-blue-600 p-6 text-white flex items-center justify-between">
           <h2 className="text-xl font-semibold">Settings - {currentInstance.name}</h2>
@@ -191,8 +195,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Google Account Section */}
           {currentInstance.isAuthenticated && currentInstance.userInfo && (
             <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-3">Google Account</h3>
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">Google Account</h3>
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     {currentInstance.userInfo.picture && (
@@ -203,8 +207,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       />
                     )}
                     <div>
-                      <p className="font-medium text-gray-800">{currentInstance.userInfo.name}</p>
-                      <p className="text-sm text-gray-600">{currentInstance.userInfo.email}</p>
+                      <p className="font-medium text-gray-800 dark:text-gray-200">{currentInstance.userInfo.name}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{currentInstance.userInfo.email}</p>
                     </div>
                   </div>
                   <button
@@ -221,11 +225,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Root Directory Section */}
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
               <Folder className="h-5 w-5 mr-2 text-blue-600" />
               Root Directory
             </h3>
-            
+
             {isEditingPath ? (
               <div className="space-y-3">
                 <div>
@@ -233,7 +237,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     type="text"
                     value={editedPath}
                     onChange={(e) => setEditedPath(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
                     placeholder="Enter directory path"
                   />
                   {pathError && (
@@ -261,15 +265,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                <div 
-                  className="bg-gray-50 p-3 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group"
+                <div
+                  className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors group"
                   onClick={handlePathEdit}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-mono text-gray-700 break-all flex-1">
+                    <p className="text-sm font-mono text-gray-700 dark:text-gray-300 break-all flex-1">
                       {currentInstance.rootDirectory || 'No directory selected'}
                     </p>
-                    <Edit3 className="h-4 w-4 text-gray-400 group-hover:text-gray-600 ml-2 flex-shrink-0" />
+                    <Edit3 className="h-4 w-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 ml-2 flex-shrink-0" />
                   </div>
                 </div>
                 <button
@@ -284,19 +288,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Sync Mode Section */}
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
               <Archive className="h-5 w-5 mr-2 text-blue-600" />
               Sync Mode
             </h3>
             <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="font-medium text-gray-800">
+                    <p className="font-medium text-gray-800 dark:text-gray-200">
                       {zipMode ? 'ZIP Archive Mode' : 'Individual Files Mode'}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {zipMode 
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {zipMode
                         ? 'Compress entire folder into a ZIP file before uploading'
                         : 'Upload and sync individual files separately'
                       }
@@ -306,7 +310,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     onClick={() => handleZipModeUpdate(!zipMode)}
                     disabled={isUpdatingZipMode}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      zipMode ? 'bg-blue-600' : 'bg-gray-200'
+                      zipMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-500'
                     } ${isUpdatingZipMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <span
@@ -316,12 +320,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                   </button>
                 </div>
-                
+
                 {zipMode && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                     <div className="flex items-start">
                       <Info className="h-4 w-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-blue-800">
+                      <div className="text-sm text-blue-800 dark:text-blue-300">
                         <p className="font-medium mb-1">ZIP Mode Benefits:</p>
                         <ul className="list-disc list-inside space-y-1 text-xs">
                           <li>Faster upload (single file vs multiple files)</li>
@@ -339,16 +343,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Sync Settings */}
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
               <RefreshCw className="h-5 w-5 mr-2 text-blue-600" />
               Sync Settings
             </h3>
             <div className="space-y-4">
               {/* Auto-sync Toggle */}
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="font-medium text-gray-800 flex items-center">
+                    <p className="font-medium text-gray-800 dark:text-gray-200 flex items-center">
                       {autoSyncEnabled ? (
                         <Power className="h-4 w-4 mr-2 text-green-600" />
                       ) : (
@@ -356,8 +360,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       )}
                       Auto-sync {autoSyncEnabled ? 'Enabled' : 'Disabled'}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {autoSyncEnabled 
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {autoSyncEnabled
                         ? 'Files will be synchronized automatically at the set interval'
                         : 'Automatic synchronization is disabled. Use manual sync only.'
                       }
@@ -377,12 +381,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                   </button>
                 </div>
-                
+
                 {!autoSyncEnabled && (
-                  <div className="mt-3 p-3 bg-amber-50 rounded-lg">
+                  <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
                     <div className="flex items-start">
                       <AlertCircle className="h-4 w-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-amber-800">
+                      <div className="text-sm text-amber-800 dark:text-amber-300">
                         <p className="font-medium mb-1">Auto-sync Disabled</p>
                         <p>Your files will only sync when you manually click "Sync Now".</p>
                       </div>
@@ -394,7 +398,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Sync Interval - Only show if auto-sync is enabled */}
               {autoSyncEnabled && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Auto-sync interval (minutes)
                   </label>
                   <div className="flex items-center gap-3">
@@ -404,9 +408,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       max="1440"
                       value={syncInterval}
                       onChange={(e) => setSyncInterval(parseInt(e.target.value) || 1)}
-                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-gray-200"
                     />
-                    <span className="text-sm text-gray-600">minutes</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">minutes</span>
                     <button
                       onClick={handleSyncIntervalUpdate}
                       disabled={isUpdatingInterval || syncInterval === Math.floor(currentInstance.syncInterval / (60 * 1000))}
@@ -421,16 +425,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       {isUpdatingInterval ? '✓ Updated' : 'Update'}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Current: {Math.floor(currentInstance.syncInterval / (60 * 1000))} minutes
                   </p>
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">Last sync</span>
-                <span className="text-sm text-gray-500">
-                  {currentInstance.lastSyncTime 
+                <span className="text-gray-700 dark:text-gray-300">Last sync</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {currentInstance.lastSyncTime
                     ? new Date(currentInstance.lastSyncTime).toLocaleString()
                     : 'Never'
                   }
@@ -441,14 +445,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Download Settings */}
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
               <Download className="h-5 w-5 mr-2 text-blue-600" />
               Download Settings
             </h3>
             <div className="space-y-4">
               {/* Download Directory */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Download Directory
                 </label>
                 <div className="flex gap-2">
@@ -456,7 +460,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     type="text"
                     value={downloadPath}
                     onChange={(e) => setDownloadPath(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
                     placeholder="Select download directory..."
                     readOnly
                   />
@@ -473,13 +477,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-800">Unzip downloaded files</p>
-                    <p className="text-sm text-gray-600">Extract files from ZIP after download</p>
+                    <p className="font-medium text-gray-800 dark:text-gray-200">Unzip downloaded files</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Extract files from ZIP after download</p>
                   </div>
                   <button
                     onClick={() => setDownloadUnzip(!downloadUnzip)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      downloadUnzip ? 'bg-blue-600' : 'bg-gray-200'
+                      downloadUnzip ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-500'
                     }`}
                   >
                     <span
@@ -492,13 +496,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-800">Replace existing files</p>
-                    <p className="text-sm text-gray-600">Overwrite files (creates backup)</p>
+                    <p className="font-medium text-gray-800 dark:text-gray-200">Replace existing files</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Overwrite files (creates backup)</p>
                   </div>
                   <button
                     onClick={() => setDownloadReplace(!downloadReplace)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      downloadReplace ? 'bg-blue-600' : 'bg-gray-200'
+                      downloadReplace ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-500'
                     }`}
                   >
                     <span
@@ -524,13 +528,45 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
+          {/* Appearance Section */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+              {darkMode ? <Moon className="h-5 w-5 mr-2 text-blue-600" /> : <Sun className="h-5 w-5 mr-2 text-blue-600" />}
+              Appearance
+            </h3>
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-800 dark:text-gray-200">
+                    {darkMode ? 'Dark Mode' : 'Light Mode'}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onToggleDarkMode(!darkMode)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    darkMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-500'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      darkMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* About Section */}
           <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
               <Info className="h-5 w-5 mr-2 text-blue-600" />
               About
             </h3>
-            <div className="space-y-2 text-sm text-gray-600">
+            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <p><strong>Version:</strong> 1.0.0</p>
               <p><strong>Instance ID:</strong> {currentInstance.id}</p>
               <p><strong>Sync Mode:</strong> {zipMode ? 'ZIP Archive' : 'Individual Files'}</p>
@@ -541,7 +577,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4">
+        <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4">
           <button
             onClick={onClose}
             className="w-full py-2 px-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"

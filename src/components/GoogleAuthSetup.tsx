@@ -22,7 +22,7 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
   const handleAutoAuth = async () => {
     setIsAuthenticating(true);
     setError('');
-    
+
     try {
       const result = await window.electronAPI.authenticateGoogle(instanceId);
       if (result.success) {
@@ -95,7 +95,7 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="bg-blue-600 p-6 text-white">
           <h2 className="text-xl font-semibold">Connect to Google Drive</h2>
           <p className="mt-2 opacity-90">Authenticate to start syncing your files</p>
@@ -103,11 +103,11 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
 
         <div className="p-6 space-y-6">
           {/* Configuration Warning */}
-          <div className="flex items-start p-3 bg-amber-50 text-amber-800 rounded-lg">
+          <div className="flex items-start p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-lg">
             <Info className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="font-medium mb-1">Setup Required</p>
-              <p>Make sure to configure your Google Drive API credentials in <code className="bg-amber-100 px-1 rounded">electron/main.cjs</code> before authenticating.</p>
+              <p>Make sure to configure your Google Drive API credentials in <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">electron/main.cjs</code> before authenticating.</p>
             </div>
           </div>
 
@@ -115,19 +115,19 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
             // Automatic authentication
             <div className="space-y-4">
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Key className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-800 mb-2">
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
                   Automatic Authentication
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   Click the button below to open Google's authentication page in your browser.
                 </p>
               </div>
 
               {error && (
-                <div className="flex items-start p-3 bg-red-50 text-red-700 rounded-lg">
+                <div className="flex items-start p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
                   <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">{error}</span>
                 </div>
@@ -171,20 +171,20 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
             // Manual authentication
             <div className="space-y-4">
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Key className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-800 mb-2">
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
                   Manual Authentication
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Follow these steps to authenticate manually:
                 </p>
               </div>
 
               <div className="space-y-3">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Step 1: Open the authentication URL
                   </p>
                   {authUrl ? (
@@ -198,30 +198,30 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
                       </button>
                       <button
                         onClick={() => copyToClipboard(authUrl)}
-                        className="p-2 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
+                        className="p-2 bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                         title="Copy URL"
                       >
                         <Copy className="h-4 w-4" />
                       </button>
                     </div>
                   ) : (
-                    <div className="text-sm text-red-600">
+                    <div className="text-sm text-red-600 dark:text-red-400">
                       Failed to generate authentication URL. Please check your API credentials.
                     </div>
                   )}
                 </div>
 
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Step 2: Copy the authorization code
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     After granting permission, copy the code from the page and paste it below.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Authorization Code
                   </label>
                   <input
@@ -229,12 +229,12 @@ const GoogleAuthSetup: React.FC<GoogleAuthSetupProps> = ({
                     value={authCode}
                     onChange={(e) => setAuthCode(e.target.value)}
                     placeholder="Paste the authorization code here"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-gray-200"
                   />
                 </div>
 
                 {error && (
-                  <div className="flex items-start p-3 bg-red-50 text-red-700 rounded-lg">
+                  <div className="flex items-start p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
                     <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
                     <span className="text-sm">{error}</span>
                   </div>

@@ -64,7 +64,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-blue-600 p-6 text-white flex items-center justify-between">
           <div className="flex items-center">
@@ -84,10 +84,10 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
         {/* Content */}
         <div className="p-6 space-y-6">
           {isFirstTime && (
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
               <div className="flex items-start">
                 <CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800">
+                <div className="text-sm text-blue-800 dark:text-blue-300">
                   <p className="font-medium mb-1">First Time Setup</p>
                   <p>Configure your download preferences. These settings will be saved for future downloads.</p>
                 </div>
@@ -97,7 +97,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
 
           {/* Download Directory */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Download Directory
             </label>
             <div className="flex gap-2">
@@ -106,7 +106,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
                 value={downloadPath}
                 onChange={(e) => setDownloadPath(e.target.value)}
                 placeholder="Select download directory..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
                 readOnly
               />
               <button
@@ -121,8 +121,8 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
 
           {/* Options */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-800">Download Options</h3>
-            
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Download Options</h3>
+
             {/* Unzip Files Option */}
             <div className="flex items-start space-x-3">
               <div className="flex items-center h-5">
@@ -131,14 +131,14 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
                   type="checkbox"
                   checked={unzipFiles}
                   onChange={(e) => setUnzipFiles(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
                 />
               </div>
               <div className="text-sm">
-                <label htmlFor="unzip-files" className="font-medium text-gray-700 cursor-pointer">
+                <label htmlFor="unzip-files" className="font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                   Unzip downloaded files
                 </label>
-                <p className="text-gray-500">
+                <p className="text-gray-500 dark:text-gray-400">
                   Extract files from ZIP archive after download. If unchecked, only the ZIP file will be saved.
                 </p>
               </div>
@@ -152,24 +152,24 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
                   type="checkbox"
                   checked={replaceFiles}
                   onChange={(e) => setReplaceFiles(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
                 />
               </div>
               <div className="text-sm">
-                <label htmlFor="replace-files" className="font-medium text-gray-700 cursor-pointer">
+                <label htmlFor="replace-files" className="font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                   Replace existing files
                 </label>
-                <p className="text-gray-500">
+                <p className="text-gray-500 dark:text-gray-400">
                   Overwrite existing files in the destination. A backup will be created automatically.
                 </p>
               </div>
             </div>
 
             {replaceFiles && (
-              <div className="ml-7 p-3 bg-amber-50 rounded-lg">
+              <div className="ml-7 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
                 <div className="flex items-start">
                   <AlertTriangle className="h-4 w-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-amber-800">
+                  <div className="text-sm text-amber-800 dark:text-amber-300">
                     <p className="font-medium mb-1">Backup Protection</p>
                     <p>Before replacing files, a backup ZIP will be created and stored in your Drive's backup-local folder. Only the 20 most recent backups are kept.</p>
                   </div>
@@ -179,10 +179,10 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
           </div>
 
           {/* Version Check Warning */}
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex items-start">
-              <RefreshCw className="h-4 w-4 text-gray-600 mr-2 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-gray-700">
+              <RefreshCw className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-gray-700 dark:text-gray-300">
                 <p className="font-medium mb-1">Version Check</p>
                 <p>The download will be cancelled if your local files are newer than the Drive version to prevent data loss.</p>
               </div>
@@ -190,10 +190,10 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
           </div>
 
           {error && (
-            <div className="bg-red-50 p-4 rounded-lg">
+            <div className="bg-red-50 dark:bg-red-900/30 p-4 rounded-lg">
               <div className="flex items-start">
                 <AlertTriangle className="h-4 w-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-red-800">
+                <div className="text-sm text-red-800 dark:text-red-300">
                   <p className="font-medium mb-1">Error</p>
                   <p>{error}</p>
                 </div>
@@ -203,7 +203,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 flex gap-3">
+        <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex gap-3">
           <button
             onClick={onClose}
             disabled={isDownloading}

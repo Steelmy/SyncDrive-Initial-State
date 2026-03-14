@@ -6,7 +6,7 @@ let mainWindow; // Déclaration de la fenêtre principale
 
 const store = require('./store.cjs');
 const setupIpcHandlers = require('./ipcHandlers.cjs');
-const { syncIntervals, startSyncInterval } = require('./sync.cjs');
+const { syncIntervals, startSyncInterval, setMainWindow } = require('./sync.cjs');
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -48,8 +48,9 @@ function createWindow() {
 // Start the app
 app.whenReady().then(() => {
   createWindow();
-  // Make mainWindow available globally
-  global.mainWindow = mainWindow;
+
+  // Pass mainWindow to modules that need it
+  setMainWindow(mainWindow);
 
   // Set up IPC handlers
   setupIpcHandlers(mainWindow);
