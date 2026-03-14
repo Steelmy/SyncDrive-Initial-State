@@ -3,11 +3,11 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const fs = require('fs');
 const { google } = require('googleapis');
-const archiver = require('archiver');
 const extract = require('extract-zip');
 const store = require('./store.cjs');
 const { manageBackupFiles, createZipFromDirectory } = require('./folders.cjs');
 const CREDENTIALS = require('./credentials.cjs');
+const { escapeDriveQuery, getDirectoryLastModified } = require('./utils.cjs');
 
 // Download files from Google Drive current folder
 async function downloadFromDrive(instanceId, options = {}) {
@@ -42,7 +42,7 @@ async function downloadFromDrive(instanceId, options = {}) {
     
     // Get files from current folder
     const driveFiles = await drive.files.list({
-      q: `'${instance.currentFolderId}' in parents and trashed=false`,
+      q: `'${escapeDriveQuery(instance.currentFolderId)}' in parents and trashed=false`,
       fields: 'files(id, name, modifiedTime, mimeType)',
       orderBy: 'modifiedTime desc',
     });
@@ -353,38 +353,6 @@ async function createLocalBackup(instance, targetPath, oauth2Client) {
     console.error('Error creating local backup:', error);
     throw error;
   }
-}
-
-// Get the most recent modification time in a directory
-function getDirectoryLastModified(dirPath) {
-  let latestTime = new Date(0);
-  
-  function checkDirectory(currentPath) {
-    try {
-      const items = fs.readdirSync(currentPath);
-      
-      for (const item of items) {
-        const fullPath = path.join(currentPath, item);
-        const stats = fs.statSync(fullPath);
-        
-        if (stats.mtime > latestTime) {
-          latestTime = stats.mtime;
-        }
-        
-        if (stats.isDirectory()) {
-          checkDirectory(fullPath);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking directory:', error);
-    }
-  }
-  
-  if (fs.existsSync(dirPath)) {
-    checkDirectory(dirPath);
-  }
-  
-  return latestTime;
 }
 
 module.exports = {

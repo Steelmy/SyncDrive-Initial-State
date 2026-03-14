@@ -24,7 +24,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   syncNow: (instanceId) => ipcRenderer.invoke("sync-now", instanceId),
   downloadFromDrive: (instanceId, options) => ipcRenderer.invoke("download-from-drive", instanceId, options),
   getConfig: () => ipcRenderer.invoke("get-config"),
-  // Event listeners
-  onConfigLoaded: (callback) => ipcRenderer.on("config-loaded", (_, data) => callback(data)),
-  onSyncCompleted: (callback) => ipcRenderer.on("sync-completed", (_, data) => callback(data))
+  // Dark mode
+  getDarkMode: () => ipcRenderer.invoke("get-dark-mode"),
+  setDarkMode: (enabled) => ipcRenderer.invoke("set-dark-mode", enabled),
+  // Event listeners (with cleanup support)
+  onConfigLoaded: (callback) => {
+    const handler = (_, data) => callback(data);
+    ipcRenderer.on("config-loaded", handler);
+    return () => ipcRenderer.removeListener("config-loaded", handler);
+  },
+  onSyncCompleted: (callback) => {
+    const handler = (_, data) => callback(data);
+    ipcRenderer.on("sync-completed", handler);
+    return () => ipcRenderer.removeListener("sync-completed", handler);
+  }
 });

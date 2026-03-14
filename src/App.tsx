@@ -6,21 +6,37 @@ import { AppConfig, Instance } from './types';
 function App() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Apply dark class to <html>
   useEffect(() => {
-    // Load config when component mounts
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
+  useEffect(() => {
+    // Load config and dark mode when component mounts
     loadConfig();
-    
-    // Setup listeners for events from main process
-    window.electronAPI.onConfigLoaded((data) => {
+    window.electronAPI.getDarkMode().then((enabled: boolean) => setDarkMode(enabled));
+
+    // Setup listeners for events from main process (with cleanup)
+    const removeConfigListener = window.electronAPI.onConfigLoaded((data: AppConfig) => {
       setConfig(data);
       setIsLoading(false);
     });
-    
-    window.electronAPI.onSyncCompleted((data) => {
+
+    const removeSyncListener = window.electronAPI.onSyncCompleted(() => {
       // Reload config to get updated sync history
       loadConfig();
     });
+
+    return () => {
+      removeConfigListener();
+      removeSyncListener();
+    };
   }, []);
   
   const loadConfig = async () => {
@@ -56,6 +72,11 @@ function App() {
     }
   };
 
+  const handleToggleDarkMode = async (enabled: boolean) => {
+    setDarkMode(enabled);
+    await window.electronAPI.setDarkMode(enabled);
+  };
+
   const handleDeleteInstance = async (instanceId: string) => {
     try {
       await window.electronAPI.deleteInstance(instanceId);
@@ -68,10 +89,10 @@ function App() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-pulse text-blue-600 text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-xl font-medium">Loading application...</p>
+          <p className="text-xl font-medium dark:text-gray-200">Loading application...</p>
         </div>
       </div>
     );
@@ -89,12 +110,14 @@ function App() {
 
   // Show the main dashboard
   return (
-    <Dashboard 
+    <Dashboard
       instances={config.instances}
       currentInstance={currentInstance}
       onSwitchInstance={handleSwitchInstance}
       onCreateInstance={handleCreateInstance}
       onDeleteInstance={handleDeleteInstance}
+      darkMode={darkMode}
+      onToggleDarkMode={handleToggleDarkMode}
     />
   );
 }

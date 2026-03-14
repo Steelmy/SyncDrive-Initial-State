@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const { google } = require('googleapis');
 const archiver = require('archiver');
+const { escapeDriveQuery } = require('./utils.cjs');
 
 // Create instance, current and backup folders in Google Drive
 async function createInstanceFolders(instance, oauth2Client) {
@@ -18,7 +19,7 @@ async function createInstanceFolders(instance, oauth2Client) {
     if (!instanceFolderId) {
       console.log('Searching for existing instance folder...');
       const existingFolders = await drive.files.list({
-        q: `name='${instance.name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        q: `name='${escapeDriveQuery(instance.name)}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
         fields: 'files(id, name)',
       });
       
@@ -49,7 +50,7 @@ async function createInstanceFolders(instance, oauth2Client) {
     if (!currentFolderId) {
       console.log('Searching for existing current folder...');
       const existingCurrentFolders = await drive.files.list({
-        q: `name='current' and mimeType='application/vnd.google-apps.folder' and '${instanceFolderId}' in parents and trashed=false`,
+        q: `name='current' and mimeType='application/vnd.google-apps.folder' and '${escapeDriveQuery(instanceFolderId)}' in parents and trashed=false`,
         fields: 'files(id, name)',
       });
       
@@ -81,7 +82,7 @@ async function createInstanceFolders(instance, oauth2Client) {
     if (!backupFolderId) {
       console.log('Searching for existing backup folder...');
       const existingBackupFolders = await drive.files.list({
-        q: `name='backup' and mimeType='application/vnd.google-apps.folder' and '${instanceFolderId}' in parents and trashed=false`,
+        q: `name='backup' and mimeType='application/vnd.google-apps.folder' and '${escapeDriveQuery(instanceFolderId)}' in parents and trashed=false`,
         fields: 'files(id, name)',
       });
       
@@ -125,7 +126,7 @@ async function manageBackupFiles(drive, backupFolderId) {
   try {
     console.log('Managing backup files...');
     const backupFiles = await drive.files.list({
-      q: `'${backupFolderId}' in parents and trashed=false`,
+      q: `'${escapeDriveQuery(backupFolderId)}' in parents and trashed=false`,
       fields: 'files(id, name, createdTime)',
       orderBy: 'createdTime desc',
     });

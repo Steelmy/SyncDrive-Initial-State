@@ -7,14 +7,39 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const http = require('http');
 const url = require('url');
-const archiver = require('archiver');
 const store = require('./store.cjs');
 const { DEFAULT_SYNC_INTERVAL, syncIntervals, startSyncInterval, syncWithDrive, stopSyncInterval } = require('./sync.cjs');
 const { createInstanceFolders } = require('./folders.cjs');
 const { downloadFromDrive } = require('./download.cjs');
 const CREDENTIALS = require('./credentials.cjs');
+const { escapeHtml, escapeDriveQuery } = require('./utils.cjs');
 
-function setupIpcHandlers() {
+// Create an OAuth2 client with automatic token refresh
+function createOAuth2Client(tokens) {
+  const oauth2Client = new google.auth.OAuth2(
+    CREDENTIALS.client_id,
+    CREDENTIALS.client_secret,
+    CREDENTIALS.redirect_uris[0]
+  );
+  oauth2Client.setCredentials(tokens);
+
+  // Automatically persist refreshed tokens
+  oauth2Client.on('tokens', (newTokens) => {
+    const instances = store.get('instances') || [];
+    for (let i = 0; i < instances.length; i++) {
+      if (instances[i].tokens && instances[i].tokens.refresh_token === tokens.refresh_token) {
+        instances[i].tokens = { ...instances[i].tokens, ...newTokens };
+        store.set('instances', instances);
+        console.log('Tokens refreshed and saved for instance', instances[i].id);
+        break;
+      }
+    }
+  });
+
+  return oauth2Client;
+}
+
+function setupIpcHandlers(mainWindow) {
   // Handle creating new instance
   ipcMain.handle('create-instance', async (event, name) => {
     const instances = store.get('instances') || [];
@@ -448,7 +473,7 @@ function setupIpcHandlers() {
               <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #fef2f2;">
                 <div style="max-width: 400px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                   <h1 style="color: #ef4444; margin-bottom: 20px;">✗ Authentication Failed</h1>
-                  <p style="color: #6b7280; margin-bottom: 10px;">Error: ${queryObject.error}</p>
+                  <p style="color: #6b7280; margin-bottom: 10px;">Error: ${escapeHtml(queryObject.error)}</p>
                   <p style="color: #6b7280;">You can close this window and try again.</p>
                 </div>
               </body>
@@ -481,7 +506,7 @@ function setupIpcHandlers() {
         });
       }, 120000); // 2 minutes timeout
 
-      server.listen(3000, (err) => {
+      server.listen(0, (err) => {
         if (err) {
           clearTimeout(serverTimeout);
           resolve({
@@ -489,7 +514,8 @@ function setupIpcHandlers() {
             error: `Failed to start authentication server: ${err.message}. Try manual authentication instead.`
           });
         } else {
-          console.log('Auth server started on port 3000');
+          const port = server.address().port;
+          console.log(`Auth server started on port ${port}`);
           shell.openExternal(authUrl);
         }
       });
@@ -522,6 +548,16 @@ function setupIpcHandlers() {
   // Handle manual sync request
   ipcMain.handle('sync-now', async (event, instanceId) => {
     return await syncWithDrive(instanceId);
+  });
+
+  // Handle dark mode
+  ipcMain.handle('get-dark-mode', () => {
+    return store.get('darkMode', false);
+  });
+
+  ipcMain.handle('set-dark-mode', (event, enabled) => {
+    store.set('darkMode', enabled);
+    return true;
   });
 
   // Handle request for current config
